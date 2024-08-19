@@ -109,95 +109,95 @@
 
     1. 以下の通り、 firebaseRedirect.js ファイルを作成する。
 
-    ``` JavaScript
-    import axios from 'axios';
-    export const redirector = async function(req, res) {
-      try {
-        const url = req.originalUrl;
-        // const cookie = req.headers['cookie'] ?? '';
-        const args = {
-          baseURL: 'http://127.0.0.1:5000',
-          transformResponse: (res) => res,
-          responseType: 'json',
-          // headers: {cookie},
-          headers: req.headers,
-          maxRedirects: 0,
-          validateStatus: null,
+        ``` JavaScript
+        import axios from 'axios';
+        export const redirector = async function(req, res) {
+          try {
+            const url = req.originalUrl;
+            // const cookie = req.headers['cookie'] ?? '';
+            const args = {
+              baseURL: 'http://127.0.0.1:5000',
+              transformResponse: (res) => res,
+              responseType: 'json',
+              // headers: {cookie},
+              headers: req.headers,
+              maxRedirects: 0,
+              validateStatus: null,
+            };
+            console.log(`firebaseRedirect: url='${url}', args=${JSON.stringify(args)} `);
+            const ax = await axios.get(url, args);
+            const status = ax.status;
+            Object.keys(ax.headers).forEach((key) => {
+              res.setHeader(key, ax.headers[key]);
+            });
+            console.log(`fetch firebase: url='${url}', length=${ax.data.length}, status=${status}`);
+            res.statusCode = status;
+            res.end(ax.data);
+          } catch (err) {
+            console.log('error:');
+            console.dir(err);
+          }
         };
-        console.log(`firebaseRedirect: url='${url}', args=${JSON.stringify(args)} `);
-        const ax = await axios.get(url, args);
-        const status = ax.status;
-        Object.keys(ax.headers).forEach((key) => {
-          res.setHeader(key, ax.headers[key]);
+        export const firebaseRedirect = () => ({
+          name: 'firebase-redirect',
+          configureServer(server) {
+            server.middlewares.use('/__/', redirector);
+            server.middlewares.use('/fn/', redirector);
+          },
         });
-        console.log(`fetch firebase: url='${url}', length=${ax.data.length}, status=${status}`);
-        res.statusCode = status;
-        res.end(ax.data);
-      } catch (err) {
-        console.log('error:');
-        console.dir(err);
-      }
-    };
-    export const firebaseRedirect = () => ({
-      name: 'firebase-redirect',
-      configureServer(server) {
-        server.middlewares.use('/__/', redirector);
-        server.middlewares.use('/fn/', redirector);
-      },
-    });
-    ```
+        ```
 
     1. firebaseRedirect が使用するモジュールを追加する
 
-    ``` command.com
-    npm i @types/node --save-dev
-    npm i axios --save-dev
-    ```
+        ``` command.com
+        npm i @types/node --save-dev
+        npm i axios --save-dev
+        ```
 
     1. firebaseRedirect プラグインを登録する。
     vite.config.ts ファイルを以下のように修正する。
 
-    ``` TypeScript
-    import { defineConfig } from 'vite'
-    import vue from '@vitejs/plugin-vue'
-    // @ts-ignore
-    import { firebaseRedirect } from './firebaseRedirect.js'
+        ``` TypeScript
+        import { defineConfig } from 'vite'
+        import vue from '@vitejs/plugin-vue'
+        // @ts-ignore
+        import { firebaseRedirect } from './firebaseRedirect.js'
 
-    export default defineConfig({
-      plugins: [vue(), firebaseRedirect()],
-    })
-    ```
+        export default defineConfig({
+          plugins: [vue(), firebaseRedirect()],
+        })
+        ```
 
     1. Firebase Hosting のディレクトリを ./public から ./dist に変更するため、firebase.json の hosting.public を修正する。また、Hosting から Functions へのリダイレクトを登録する。firebase.json の hosting.rewrites を追加する
 
-    ``` JavaScript
-    {
-      "hosting": {
-        "public": "dist",
-        "rewrites": [ {
-          "source": "/fn/helloWorld",
-          "function": "helloWorld",
-          "region": "us-central1"
-        } ],
-        ...
-    ```
+        ``` JavaScript
+        {
+          "hosting": {
+            "public": "dist",
+            "rewrites": [ {
+              "source": "/fn/helloWorld",
+              "function": "helloWorld",
+              "region": "us-central1"
+            } ],
+            ...
+        ```
 
     1. テストのため src/components/HelloWorld.vue を以下のように修正する
 
-    ``` JavaScript
-    // scriptタグの中に以下を追加する
-    const hello = ref('')
-    const fetchHello = async () => {
-      hello.value = await (await fetch('/fn/helloWorld')).text();
-    }
-    ```
+        ``` JavaScript
+        // scriptタグの中に以下を追加する
+        const hello = ref('')
+        const fetchHello = async () => {
+          hello.value = await (await fetch('/fn/helloWorld')).text();
+        }
+        ```
 
-    ``` HTML
-    <!-- HTMLテンプレート内に以下を追加する -->
-    <button type="button" @click="fetchHello">call hello</button>
-    <button type="button" @click="hello=''">clear</button>
-    <p>{{ hello }}</p>
-    ```
+        ``` HTML
+        <!-- HTMLテンプレート内に以下を追加する -->
+        <button type="button" @click="fetchHello">call hello</button>
+        <button type="button" @click="hello=''">clear</button>
+        <p>{{ hello }}</p>
+        ```
 
     ブラウザでvite のテストサーバー [http://localhost:5173/] を開いて、ボタンの動作を確認する
 
