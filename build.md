@@ -238,3 +238,35 @@
       },
     }
     ```
+
+1. デバッガを設定する
+
+    ブラウザ内で実行されるプログラムは、ブラウザの機能でデバッグする。また、[Vue.js devtools](https://devtools.vuejs.org/)を使うと Vue 固有の機能のデバッグもできる。
+
+    Functions のプログラムをデバッグするには、以下の内容で ./.vscode/launch.json ファイルを作成する。
+
+    ``` JavaScript
+    {
+      "version": "0.2.0",
+      "configurations": [
+        {
+          "type": "node",
+          "request": "attach",
+          "name": "Debug",
+          "port": 9229
+        }
+      ]
+    }
+    ```
+
+    Firebase エミュレータを --inspect-functions オプション付きで起動する
+
+    ``` command.com
+    firebase emulators:start --inspect-functions
+    ```
+
+    vscode の Run and Debug view を表示して（Ctrl+Shift+D）左上の緑の三角アイコンをクリック(F5)してデバッグモードにする。
+
+    Functions の任意のソースファイル functions/src/index.ts を開いて、適当な行の行番号のすぐ左をクリックしてブレークポイントを設定する。ブラウザのアプリ画面から Functions の機能を呼び出せば、ブレークポイントで停止するはず。
+
+    準備が整うまで数秒～10秒くらい、やや待たされることがある。
