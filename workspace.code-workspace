@@ -1,0 +1,25 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"eslint.nodePath": ".",
+		"eslint.workingDirectories": [".", "./functions"],
+		"eslint.format.enable": true,
+		"typescript.validate.enable": true,
+		"javascript.format.enable": false,
+		"[javascript]": {
+			"editor.defaultFormatter": "dbaeumer.vscode-eslint",
+			"editor.insertSpaces": true
+		},
+		"[typescript]": {
+			"editor.defaultFormatter": "dbaeumer.vscode-eslint",
+			"editor.insertSpaces": true,
+		},
+		"[vue]": {
+			"editor.defaultFormatter": "dbaeumer.vscode-eslint",
+		},
+	},
+}
